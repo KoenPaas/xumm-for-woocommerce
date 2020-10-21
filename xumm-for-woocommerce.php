@@ -159,21 +159,22 @@ function init_xumm_gateway_class() {
             if(!empty($_GET['xumm-id'])) {
                 $data = getXummData($_GET['xumm-id'], $this);
                 //Todo:: first check if success
-                if (empty($data['payload'])) return;
-                switch ($data['payload']['tx_type']) {
-                    case 'SignIn':
-                        $account = $data['response']['account'];
-                        if(!empty($account))
-                            $this->update_option('destination', $account );
-                            echo('<div class="notice notice-success"><p>Sign In successfull please check address & test payment</p></div>');
-                        break;
-
-                    case 'TrustSet':
-
-                        break;
-                    
-                    default:
-                        break;
+                if (!empty($data['payload'])) {
+                    switch ($data['payload']['tx_type']) {
+                        case 'SignIn':
+                            $account = $data['response']['account'];
+                            if(!empty($account))
+                                $this->update_option('destination', $account );
+                                echo('<div class="notice notice-success"><p>Sign In successfull please check address & test payment</p></div>');
+                            break;
+    
+                        case 'TrustSet':
+    
+                            break;
+                        
+                        default:
+                            break;
+                    }
                 }
             }
 
@@ -273,6 +274,7 @@ function init_xumm_gateway_class() {
             ?>
             <table class="form-table">
                 <?php
+                $this->generate_settings_html();
                 $storeCurrency = get_woocommerce_currency();
                     if(empty($this->api) && empty($this->api_secret)) echo('<div class="notice notice-info"><p>Please add XUMM API keys from <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
                     else {
@@ -300,7 +302,6 @@ function init_xumm_gateway_class() {
                     }
                     if(!in_array($storeCurrency, $this->availableCurrencies)) echo('<div class="notice notice-error"><p>Please change store currency</p></div>');
                     if ($storeCurrency != 'XRP' && $this->currencies != 'XRP' && $storeCurrency != $this->currencies) echo('<div class="notice notice-error"><p>Please change currency here</p></div>');
-                    $this->generate_settings_html();
                 ?>
             </table>
 
