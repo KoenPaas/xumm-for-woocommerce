@@ -286,12 +286,14 @@ function init_xumm_gateway_class() {
                             ));
                         if( !is_wp_error( $response ) ) {
                             $body = json_decode( $response['body'], true );
-                            if(!empty($body['pong'] && $body['pong'] == true)) echo('<div class="notice notice-success"><p>Connection to <a href="https://apps.xumm.dev/">XUMM API</a> is CONNECTED</p></div>');
+                            if(!empty($body['pong'] && $body['pong'] == true)) {
+                                echo('<div class="notice notice-success"><p>Connection to <a href="https://apps.xumm.dev/">XUMM API</a> is CONNECTED</p></div>');
+                                
+                                $webhookApi = $body['auth']['application']['webhookurl'];
+                                $webhook = get_home_url() . '/?wc-api=XUMM';
+                                if($webhook != $webhookApi) echo('<div class="notice notice-error"><p>WebHook incorrect on <a href="https://apps.xumm.dev/">XUMM API</a>, should be '. $webhook .'</p></div>');
+                            }
                             else echo('<div class="notice notice-error"><p>Connection API Error to the <a href="https://apps.xumm.dev/">XUMM API</a>. Check your API keys. Got a code: '. $body['error']['code'] .'</p></div>');
-
-                            $webhookApi = $body['auth']['application']['webhookurl'];
-                            $webhook = get_home_url() . '/?wc-api=XUMM';
-                            if($webhook != $webhookApi) echo('<div class="notice notice-error"><p>WebHook incorrect on <a href="https://apps.xumm.dev/">XUMM API</a>, should be '. $webhook .'</p></div>');
                         } else {
                             echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API. WP GET ERROR</a></p></div>');
                        }
