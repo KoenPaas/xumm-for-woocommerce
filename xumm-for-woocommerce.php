@@ -287,13 +287,13 @@ function init_xumm_gateway_class() {
                         if( !is_wp_error( $response ) ) {
                             $body = json_decode( $response['body'], true );
                             if(!empty($body['pong'] && $body['pong'] == true)) echo('<div class="notice notice-success"><p>Connection to <a href="https://apps.xumm.dev/">XUMM API</a> is CONNECTED</p></div>');
-                            else echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
+                            else echo('<div class="notice notice-error"><p>Connection API Error to the <a href="https://apps.xumm.dev/">XUMM API</a>. Check your API keys. Got a code: '. $body['error']['code'] .'</p></div>');
 
                             $webhookApi = $body['auth']['application']['webhookurl'];
                             $webhook = get_home_url() . '/?wc-api=XUMM';
                             if($webhook != $webhookApi) echo('<div class="notice notice-error"><p>WebHook incorrect on <a href="https://apps.xumm.dev/">XUMM API</a>, should be '. $webhook .'</p></div>');
                         } else {
-                            echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
+                            echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API. WP GET ERROR</a></p></div>');
                        }
                     }
                     if(!in_array($storeCurrency, $this->availableCurrencies)) echo('<div class="notice notice-error"><p>Please change store currency</p></div>');
@@ -409,7 +409,9 @@ function init_xumm_gateway_class() {
                 'wc-api' => 'XUMM',
                 'order_id' => $identifier
             );
-            $return_url = get_home_url() . '/?' . http_build_query($query);
+
+            //$return_url = get_home_url() . '/?' . http_build_query($query);
+            $return_url = add_query_arg($query, get_home_url());
 
             $headers = array(
                 'Content-Type' => 'application/json',
@@ -429,7 +431,7 @@ function init_xumm_gateway_class() {
                     ),
                 'options' => array(
                     'submit' => 'true',
-                    'expire' => 1,
+                    'expire' => 15,
                     'return_url' => array(
                         'web' => $return_url
                     )   
