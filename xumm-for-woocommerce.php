@@ -554,7 +554,10 @@ function init_xumm_gateway_class() {
 
             function getReturnUrl($custom_identifier, $order, $headers) {
                 $txbody = getTransactionDetails($custom_identifier, $headers);
-                if(empty($txbody)) return $order->get_checkout_payment_url(false);
+                if(empty($txbody)) {
+                    wc_add_notice( 'Failed payment please try again', 'error' );
+                    return $order->get_checkout_payment_url(false);
+                }
                 $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
                 $total = $order->get_total();
                 if(!checkDeliveredAmount($delivered_amount, $total)) {
