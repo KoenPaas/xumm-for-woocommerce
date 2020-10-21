@@ -4,8 +4,8 @@
  * Plugin URI: https://github.com/KoenPaas/xumm-for-woocommerce
  * Description: Make XRP payments using XUMM
  * Author: XUMM
- * Author URI: 
- * Version: 0.1
+ * Author URI: https://xumm.app/
+ * Version: 0.1.1
  */
 
 //http://localhost?wc-api=XUMM
@@ -18,11 +18,11 @@ function init_xumm_gateway_class() {
         public $availableCurrencies = [];
 
         public function __construct() {
-            $this->id = 'xumm'; //Unique ID for your gateway
+            $this->id = 'xumm';
             $this->icon = ''; //If you want to show an image next to the gateway’s name on the frontend, enter a URL to an image.
-            $this->has_fields = false;//– Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
-            $this->method_title = 'Accept XUMM payments';//– Title of the payment method shown on the admin page.
-            $this->method_description = 'Receive any supported currency into your XRP account using XUMM'; //Description for the payment method shown on the admin page.
+            $this->has_fields = false; //– Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
+            $this->method_title = 'Accept XUMM payments';
+            $this->method_description = 'Receive any supported currency into your XRP account using XUMM';
 
             $this->supports = array(
                 'products'
@@ -43,10 +43,6 @@ function init_xumm_gateway_class() {
             $this->init_settings();
 
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-
-            //add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
-
-            //add_action( 'admin_enqueue_scripts', array ($this, 'admin_script') );
 
             add_action( 'woocommerce_api_xumm', array( $this, 'callback_handler' ));
             
@@ -76,20 +72,20 @@ function init_xumm_gateway_class() {
                 'title' => array(
                     'title'       => 'Title',
                     'type'        => 'text',
-                    'description' => 'This controls the title which the user sees during checkout.',
+                    'description' => 'This is the title which the user sees during checkout.',
                     'default'     => 'XRP',
                     'desc_tip'    => true,
                 ),
                 'description' => array(
                     'title'       => 'Description',
                     'type'        => 'textarea',
-                    'description' => 'This controls the description which the user sees during checkout.',
-                    'default'     => 'Remove this?',
+                    'description' => 'This is the text users will see in the checkout for this payment method',
+                    'default'     => 'Pay with XRP using the #1 XRPL wallet: XUMM.',
                 ),
                 'destination' => array(
                     'title'       => 'XRP Destination address',
                     'type'        => 'text',
-                    'dissabled'   => 'true',
+                    'disabled'    => true,
                     'description' => 'This is your XRP r Address',
                     'desc_tip'    => true,
                 ),
@@ -139,7 +135,7 @@ function init_xumm_gateway_class() {
             );
 
              $body['account'] = $this->destination;
-             $body['store_currencie'] = get_woocommerce_currency();
+             $body['store_currency'] = get_woocommerce_currency();
 
             wp_enqueue_script( 'custom-js', plugins_url( 'js/admin.js' , __FILE__ ), array('jquery') );
             wp_localize_script( 'custom-js', 'xumm_object', $body);
@@ -147,6 +143,40 @@ function init_xumm_gateway_class() {
         }
 
         public function admin_options() {
+            function getXummData($id, $self){
+                $response = wp_remote_get('https://xumm.app/api/v1/platform/payload/ci/'. $id, array(
+                    'method'    => 'GET',
+                    'headers'   => array(
+                        'Content-Type' => 'application/json',
+                        'X-API-Key' => $self->api,
+                        'X-API-Secret' => $self->api_secret
+                    )
+                ));
+                $body = json_decode( $response['body'], true );
+                return $body;
+            }
+
+            if(!empty($_GET['xumm-id'])) {
+                $data = getXummData($_GET['xumm-id'], $this);
+                //Todo:: first check if success
+                if (empty($data['payload'])) return;
+                switch ($data['payload']['tx_type']) {
+                    case 'SignIn':
+                        $account = $data['response']['account'];
+                        if(!empty($account))
+                            $this->update_option('destination', $account );
+                            echo('<div class="notice notice-success"><p>Sign In successfull please check address & test payment</p></div>');
+                        break;
+
+                    case 'TrustSet':
+
+                        break;
+                    
+                    default:
+                        break;
+                }
+            }
+
             ?>
             <h2><?php _e('XUMM Payment Gateway for WooCommerce','woocommerce'); ?></h2>
             <?php
@@ -154,8 +184,13 @@ function init_xumm_gateway_class() {
                     ?>
                         <div id="customFormActionResult" style="display: none;">
                             <?php
-                                global $wp;
-                                $pluginurl = add_query_arg( $_SERVER['QUERY_STRING'], '', home_url( $wp->request )  . '/wp-admin/admin.php' );
+                                $query_arr = array(
+                                    'page'      => 'wc-settings',
+                                    'tab'       => 'checkout',
+                                    'section'   => 'xumm'
+                                );
+
+                                $return_url = get_home_url() .'/wp-admin/admin.php/?' . http_build_query($query_arr);
 
                                 $headers = [
                                     'Content-Type' => 'application/json',
@@ -165,6 +200,8 @@ function init_xumm_gateway_class() {
 
                                 switch($_POST["specialAction"]) {
                                     case 'set_destination':
+                                        $identifier = 'sign-in_' . strtoupper(substr(md5(microtime()), 0, 10));
+                                        $return_url = add_query_arg( 'xumm-id', $identifier, $return_url);
                                         $body = [
                                             "txjson" => [
                                                 "TransactionType" => "SignIn"
@@ -172,12 +209,17 @@ function init_xumm_gateway_class() {
                                             "options" => [
                                                 "submit" => true,
                                                 "return_url" => [
-                                                    "web" => $pluginurl
+                                                    "web" => $return_url
                                                 ]
-                                            ]
+                                            ],
+                                            'custom_meta' => array(
+                                                'identifier' => $identifier
+                                            )
                                         ];
                                         break;
                                     case 'set_trustline':
+                                        $identifier = 'trustline_' . strtoupper(substr(md5(microtime()), 0, 10));
+                                        $return_url = add_query_arg( 'xumm-id', $identifier, $return_url);
                                         $body = [
                                             "txjson" => [
                                                 "TransactionType" => "TrustSet",
@@ -192,9 +234,12 @@ function init_xumm_gateway_class() {
                                             "options" => [
                                                 "submit" => true,
                                                 "return_url" => [
-                                                    "web" => $pluginurl
+                                                    "web" => $return_url
                                                 ]
-                                            ]
+                                            ],
+                                            'custom_meta' => array(
+                                                'identifier' => $identifier
+                                            )
                                         ];
                                         break;
                                 }
@@ -210,32 +255,17 @@ function init_xumm_gateway_class() {
 
                                 if( !is_wp_error( $response ) ) {
                                     $body = json_decode( $response['body'], true );
-                                    
-                                    if ( $body['next']['always'] != null ) {
+                                    $redirect = $body['next']['always'];
+                                    if ( $redirect != null ) {
                                        // Redirect to the XUMM processor page
-                                        $log = $body['next']['always'];
-                                        echo($log);
-
+                                        echo($redirect);
                                     } else {
-                                      $log = 'error';
+                                        // Todo error handling
                                    }
                             
                                } else {
                                    wc_add_notice(  'Connection error.', 'error' );
                                }
-
-                                if ( is_array( $log ) || is_object( $log ) ) {
-                                    error_log( print_r( $log, true ) );
-                                 } else {
-                                    error_log( $log );
-                                 }
-
-                                // if ($_POST["specialAction"] == 'set_destination') {
-                                //     // Doe SignIn request naar XUMM backend, return url is huidige URL + extra param: payload id
-                                //     // indien return met payload ID: call API om payload ID results op te halen, en
-                                //     // als succesvol gesigned: haal signer address op, en sla op in database
-                                //     // Of vul disabled input en laat mensen zelf op opslaan klikken om te bevestigen (netter)
-                                // }
                             ?>
                         </div>
                     <?php
@@ -243,8 +273,32 @@ function init_xumm_gateway_class() {
             ?>
             <table class="form-table">
                 <?php
-                    if(in_array(get_woocommerce_currency(), $this->availableCurrencies)) $this->generate_settings_html();
-                    else echo('Change store currency to euro, us dollar, bitcoin, ethereum or xrp')
+                $storeCurrency = get_woocommerce_currency();
+                    if(empty($this->api) && empty($this->api_secret)) echo('<div class="notice notice-info"><p>Please add XUMM API keys from <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
+                    else {
+                        $response = wp_remote_get('https://xumm.app/api/v1/platform/ping', array(
+                            'method'    => 'GET',
+                            'headers'   => array(
+                                'Content-Type' => 'application/json',
+                                'X-API-Key' => $this->api,
+                                'X-API-Secret' => $this->api_secret
+                                )
+                            ));
+                        if( !is_wp_error( $response ) ) {
+                            $body = json_decode( $response['body'], true );
+                            if(!empty($body['pong'] && $body['pong'] == true)) echo('<div class="notice notice-success"><p>Connection to <a href="https://apps.xumm.dev/">XUMM API</a> is CONNECTED</p></div>');
+                            else echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
+
+                            $webhookApi = $body['auth']['application']['webhookurl'];
+                            $webhook = get_home_url() . '/?wc-api=XUMM';
+                            if($webhook != $webhookApi) echo('<div class="notice notice-error"><p>WebHook incorrect on <a href="https://apps.xumm.dev/">XUMM API</a>, should be '. $webhook .'</p></div>');
+                        } else {
+                            echo('<div class="notice notice-error"><p>Connection Error to the <a href="https://apps.xumm.dev/">XUMM API</a></p></div>');
+                       }
+                    }
+                    if(!in_array($storeCurrency, $this->availableCurrencies)) echo('<div class="notice notice-error"><p>Please change store currency</p></div>');
+                    if ($storeCurrency != 'XRP' && $this->currencies != 'XRP' && $storeCurrency != $this->currencies) echo('<div class="notice notice-error"><p>Please change currency here</p></div>');
+                    $this->generate_settings_html();
                 ?>
             </table>
 
@@ -256,8 +310,8 @@ function init_xumm_gateway_class() {
 
                 <!-- Todo::html -->
             <!-- <input type="submit" value="Set Trustline"> -->
-            <button type="button" class="customFormActionBtn" id="set_destination" style="border-style: none">
-                <img src="https://xumm.community/assets/xummSignIn.svg" alt="Login with XUMM" style="width: 230px; height: 40px;">
+            <button type="button" class="customFormActionBtn" id="set_destination" style="border-style: none;">
+                <?php echo(file_get_contents(plugin_dir_path( __FILE__ ).'public/images/signin.svg')); ?>
             </button>
             <button type="button" class="customFormActionBtn" id="set_trustline">
                 Add Trustline
@@ -295,24 +349,13 @@ function init_xumm_gateway_class() {
         }
 
         public function payment_fields() {
+            echo wpautop( wp_kses_post( $this->description ) );
             ?>
-                <img src="https://xumm.community/assets/xummSignIn.svg" alt="Login with XUMM" style="width: 230px; height: 40px;">
+                <?php echo(file_get_contents(plugin_dir_path( __FILE__ ).'public/images/pay.svg')); ?>
             <?php
         }
 
-        public function validate_fields(){
- 
-            if( empty( $_POST[ 'billing_first_name' ]) ) {
-                wc_add_notice(  'First name is required!', 'error' );
-                return false;
-            }
-            return true;
-         
-        }
-
         public function process_payment( $order_id ) {
-            global $woocommerce;
-
             $order = wc_get_order( $order_id );
             $storeCurrency = get_woocommerce_currency();
             $exchange_rates_url = 'https://data.ripple.com/v2/exchange_rates/';
@@ -329,9 +372,9 @@ function init_xumm_gateway_class() {
             } else if ($storeCurrency == $this->currencies) {
                 $apiCall = null;
             } else if ($storeCurrency != 'XRP' && $this->currencies != 'XRP' && $storeCurrency != $this->currencies) {
-                wc_add_notice(  'IOU to IOU transaction. Not implemented yet!', 'error' );
+                wc_add_notice( 'Currency pair not supported, conversion from '. $storeCurrency . ' to -> '.$this->currencies, 'error' );
                 //TODO: set correct issuer for base currency.!!!!!!!!!!!!!!!!!!!!!!!
-                $apiCall = $exchange_rates_url . $storeCurrency .'+'. $this->issuers .'/'. $this->currencies .'+'. $this->issuers;
+                //$apiCall = $exchange_rates_url . $storeCurrency .'+'. $this->issuers .'/'. $this->currencies .'+'. $this->issuers;
                 return;
             } else {
                 wc_add_notice(  'Currency issue', 'error' );
@@ -344,7 +387,6 @@ function init_xumm_gateway_class() {
 
                 preg_match('@^(?:https://)?([^/]+)@i', $apiCall, $matches);
                 $host = $matches[1];
-                $log = $host;
                 switch ($host) {
                     case 'www.bitstamp.net':
                         $totalSum = $order->get_total() / $body['ask'];
@@ -360,12 +402,6 @@ function init_xumm_gateway_class() {
                 $totalSum = $order->get_total();
             }
 
-            if ( is_array( $log ) || is_object( $log ) ) {
-                error_log( print_r( $log, true ) );
-                } else {
-                error_log( $log );
-                }
-
             $identifier = $order_id . '_' . strtoupper(substr(md5(microtime()), 0, 10));
 
             $totalSum = round($totalSum, 6);
@@ -375,7 +411,6 @@ function init_xumm_gateway_class() {
             );
             $return_url = get_home_url() . '/?' . http_build_query($query);
 
-            error_log($return_url);
             $headers = array(
                 'Content-Type' => 'application/json',
                 'X-API-Key' => $this->api,
@@ -575,6 +610,8 @@ function init_xumm_gateway_class() {
                 wp_safe_redirect($redirect_url);
             }
 
+            // Callback section
+
             $json = file_get_contents('php://input');
             $data = json_decode($json, true);
 
@@ -609,23 +646,7 @@ function init_xumm_gateway_class() {
             
                     //Empty cart
                     WC()->cart->empty_cart();
-                    // $woocommerce->cart->empty_cart();
-                } else {
-                    $response = wp_remote_get('https://xumm.app/api/v1/platform/payload/'. $uuid, array(
-                        'method'    => 'GET',
-                        'headers'   => $headers,
-                    ));
-                    $body = json_decode( $response['body'], true );
-                    $account = $body['response']['account'];
-                    $this->form_fields['destination'] = array(
-                        'title'       => 'XRP Destination address',
-                        'type'        => 'text',
-                        'hidden'      => 'true',
-                        'description' => 'This is your XRP r Address',
-                        'desc_tip'    => true,
-                        'default'     => $account
-                    );
-                    $this->update_option('destination', $account );
+
                 }
             }
         }

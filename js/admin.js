@@ -18,14 +18,12 @@ jQuery(document).ready(function($) {
 
     $("#woocommerce_xumm_currencies").change(function() {
         selectedCurrency = $(this).children(":selected").attr("value");
-        //console.log(selectedCurrency);
         setIssuer()
         dissableIssuers()
     })
 
     jQuery("#woocommerce_xumm_issuers").change(function() {
         selectedIssuer = jQuery(this).children(":selected").attr("value");
-        //console.log(selectedIssuer);
 
         let obj = {
             account: selectedIssuer,
@@ -33,11 +31,9 @@ jQuery(document).ready(function($) {
         }
 
         if (!containsObject(obj, trustlinesSet)) {
-            //console.log('add a btn to sign a trustline set transaction with xumm.app')
             jQuery('#set_trustline').show()
         } else {
             jQuery('#set_trustline').hide()
-            //console.log('hide btn')
         }
     })
 
@@ -81,10 +77,7 @@ jQuery(document).ready(function($) {
                 }
             })
         }
-        
         const response = await fetch(url, option)
-
-        //console.log(response)
     })
 
     setIssuer()
@@ -136,18 +129,21 @@ function dissableIssuers() {
         exchange = xumm_object.details[exchange]
         if (exchange.currencies[IOU]!== undefined) {
             let avail = exchange.currencies[IOU].issuer
-            list.push(avail)
+            list.push({
+                name: exchange.name,
+                issuer: avail
+            })
+
         }
     }
 
     jQuery("#woocommerce_xumm_issuers option").each( (index, elem) => {
+        jQuery(elem).hide()
+    })
+        jQuery("#woocommerce_xumm_issuers option").each( (index, elem) => {
         var val = jQuery(elem).attr("value")
-        list.forEach(account => {
-            if (val != account) {
-                //console.log('not in the list invisible option')
-                jQuery(elem).hide()
-            } else {
-                //console.log('Item is in the list visible option')
+        list.forEach(obj => {
+            if(obj.issuer == val) {
                 jQuery(elem).show()
             }
         })
@@ -199,10 +195,6 @@ function trustlineAvailable() {
 
 function checkIfAvailableTrustline() {
     trustlineAvailable()
-    //console.log(issuers[issuer])
-    // issuers.forEach(issuer => {
-    //     if(issuer)
-    // })
 }
 
 function setTrustline() {
