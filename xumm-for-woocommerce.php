@@ -486,17 +486,17 @@ function init_xumm_gateway_class() {
         }
 
         public function callback_handler() {
-            $headers = array(
-                'Content-Type' => 'application/json',
-                'X-API-Key' => $this->api,
-                'X-API-Secret' => $this->api_secret
-            );
 
             function getPayloadXummById($id, $headers) {
                 $response = wp_remote_get('https://xumm.app/api/v1/platform/payload/ci/'. $id, array(
                     'method'    => 'GET',
                     'headers'   => $headers
                 ));
+                if( is_wp_error( $response ) ) {
+                    wc_add_notice(  'Connection error getting payload XUMM.', 'error' );
+                    exit();
+                }
+
                 $body = json_decode( $response['body'], true );
                 return $body;
             }
@@ -513,10 +513,15 @@ function init_xumm_gateway_class() {
                     'method'    => 'GET',
                     'headers'   => $headers
                 ));
+                if( is_wp_error( $tx ) ) {
+                    wc_add_notice(  'Connection error getting transaction from XUMM.', 'error' );
+                    exit();
+                }
                 return json_decode( $tx['body'], true );
             }
 
-            function checkDeliveredAmount($delivered_amount, $total, $xr) {
+            function checkDeliveredAmount($delivered_amount, $order, $xr, $issuers) {
+                $total = $order->get_total();
                 if($delivered_amount != null) {
                     switch (gettype($delivered_amount)) {
                         default:
@@ -533,7 +538,7 @@ function init_xumm_gateway_class() {
                             } else return true;
                             break;
                         case 'array':
-                            if($delivered_amount['value'] < $total) {
+                            if($delivered_amount['value'] <= ($total * 0.99)) {
                                 $msg = 'Step 1: not enough money';
                                 error_log($msg);
                                 wc_add_notice( $msg, 'error' );
@@ -544,12 +549,14 @@ function init_xumm_gateway_class() {
                                 $msg = 'Step 2: Wrong currency';
                                 error_log($msg);
                                 wc_add_notice( $msg, 'error' );
+                                $order->add_order_note( 'Your order with custom id: '.$custom_identifier.' is not paid. Wrong currency pair contact support', true );
                                 return false;
                             }
-                            if($delivered_amount['issuer'] != $this->issuers) {
+                            if($delivered_amount['issuer'] != $issuers) {
                                 $msg = 'Step 3: Wrong Issuer';
                                 error_log($msg);
                                 wc_add_notice( $msg, 'error' );
+                                $order->add_order_note( 'Your order with custom id: '.$custom_identifier.' is not paid. Wrong issuer contact support', true );
                                 return false;
                             }
                             else return true;
@@ -561,7 +568,12 @@ function init_xumm_gateway_class() {
                 }
             }
 
-            function getReturnUrl($custom_identifier, $order, $headers) {
+            function getReturnUrl($custom_identifier, $order, $self) {
+                $headers = array(
+                    'Content-Type' => 'application/json',
+                    'X-API-Key' => $self->api,
+                    'X-API-Secret' => $self->api_secret
+                );
                 $payload = getPayloadXummById($custom_identifier, $headers);
                 $txid = $payload['response']['txid'];
                 $xr = $payload['custom_meta']['blob']['xr'];
@@ -572,8 +584,7 @@ function init_xumm_gateway_class() {
                     return $order->get_checkout_payment_url(false);
                 }
                 $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
-                $total = $order->get_total();
-                if(!checkDeliveredAmount($delivered_amount, $total, $xr)) {
+                if(!checkDeliveredAmount($delivered_amount, $order, $xr, $self->issuers)) {
                     $log = 'redirect to payment page';
                     error_log( $log );
                     $redirect_url = $order->get_checkout_payment_url(false);
@@ -599,7 +610,7 @@ function init_xumm_gateway_class() {
                         $redirect_url = $this->get_return_url( $order );
                         break;
                     case 'pending':
-                        $redirect_url = getReturnUrl($custom_identifier, $order, $headers);
+                        $redirect_url = getReturnUrl($custom_identifier, $order, $this);
                         break;
                     case 'on-hold':
                         $redirect_url = $order->get_checkout_payment_url(false);
@@ -638,22 +649,21 @@ function init_xumm_gateway_class() {
             if($uuid != null) {
                 $custom_identifier = $data['custom_meta']['identifier'];
                 if ($custom_identifier != null) {
-                    $txid = getPayloadStatusXummWithId($custom_identifier, $headers);
+                    $payload = getPayloadXummById($custom_identifier, $headers);
+                    $txid = $payload['response']['txid'];
+                    $xr = $payload['custom_meta']['blob']['xr'];
                     // we received the payment
                     $txbody = getTransactionDetails($txid, $headers);
 
                     $order_id = explode("_", $custom_identifier)[0];
                     $order = wc_get_order( $order_id );
-                    $total = $order->get_total();
                     $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
-
-                    if(!checkDeliveredAmount($amount, $total)) {
+                    if(!checkDeliveredAmount($delivered_amount, $order, $xr, $this->issuers)) {
                         $log = 'redirect to payment page';
                         error_log( $log );
-                        //$return_url = $this->get_return_url( $order );
                         $redirect_url = $order->get_checkout_payment_url(false);
                         error_log($redirect_url);
-                        exit;
+                        exit();
                     }
 
                     $order->payment_complete();
