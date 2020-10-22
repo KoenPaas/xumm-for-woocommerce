@@ -19,7 +19,7 @@ function init_xumm_gateway_class() {
 
         public function __construct() {
             $this->id = 'xumm';
-            $this->icon = ''; //If you want to show an image next to the gateway’s name on the frontend, enter a URL to an image.
+            $this->icon = plugin_dir_url( __FILE__ ).'public/images/icon.jpg'; //If you want to show an image next to the gateway’s name on the frontend, enter a URL to an image.
             $this->has_fields = false; //– Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
             $this->method_title = 'Accept XUMM payments';
             $this->method_description = 'Receive any supported currency into your XRP account using XUMM';
@@ -85,7 +85,6 @@ function init_xumm_gateway_class() {
                 'destination' => array(
                     'title'       => 'XRP Destination address',
                     'type'        => 'text',
-                    'disabled'    => true,
                     'description' => 'This is your XRP r Address',
                     'desc_tip'    => true,
                 ),
@@ -353,9 +352,7 @@ function init_xumm_gateway_class() {
 
         public function payment_fields() {
             echo wpautop( wp_kses_post( $this->description ) );
-            ?>
-                <?php echo(file_get_contents(plugin_dir_path( __FILE__ ).'public/images/pay.svg')); ?>
-            <?php
+            echo file_get_contents(plugin_dir_path( __FILE__ ).'public/images/pay.svg');
         }
 
         public function process_payment( $order_id ) {
@@ -372,8 +369,10 @@ function init_xumm_gateway_class() {
                 $apiCall = strtolower($apiCall);
             } else if ($storeCurrency == 'XRP' && $this->currencies == 'XRP') {
                 $apiCall = null;
+                $xr = 1;
             } else if ($storeCurrency == $this->currencies) {
                 $apiCall = null;
+                $xr = 1;
             } else if ($storeCurrency != 'XRP' && $this->currencies != 'XRP' && $storeCurrency != $this->currencies) {
                 wc_add_notice( 'Currency pair not supported, conversion from '. $storeCurrency . ' to -> '.$this->currencies, 'error' );
                 //TODO: set correct issuer for base currency.!!!!!!!!!!!!!!!!!!!!!!!
@@ -392,12 +391,15 @@ function init_xumm_gateway_class() {
                 $host = $matches[1];
                 switch ($host) {
                     case 'www.bitstamp.net':
-                        $totalSum = $order->get_total() / $body['ask'];
+                        $xr = 1 / $body['ask'];
+                        $totalSum = $order->get_total() * $xr;
                         break;
                     case 'data.ripple.com':
-                        $totalSum = $order->get_total() * $body['rate'];
+                        $xr = $body['rate'];
+                        $totalSum = $order->get_total() * $xr;
                         break;
                     default:
+                        $xr = null;
                         $totalSum = $order->get_total();
                         break;
                 }
@@ -430,7 +432,8 @@ function init_xumm_gateway_class() {
                         'currency' => $this->currencies,
                         'value' => $totalSum,
                         'issuer' => $this->issuers
-                    )
+                        ),
+                    'Flags' => 2147483648
                     ),
                 'options' => array(
                     'submit' => 'true',
@@ -440,7 +443,11 @@ function init_xumm_gateway_class() {
                     )   
                 ),
                 'custom_meta' => array(
-                    'identifier' => $identifier
+                    'identifier' => $identifier,
+                    'blob' => array(
+                        'xr' => $xr,
+                        'base' => $storeCurrency
+                    )
                 )
             ];
             $body = wp_json_encode($body);
@@ -485,18 +492,16 @@ function init_xumm_gateway_class() {
                 'X-API-Secret' => $this->api_secret
             );
 
-            function getPayloadStatusXummWithId($id, $headers) {
+            function getPayloadXummById($id, $headers) {
                 $response = wp_remote_get('https://xumm.app/api/v1/platform/payload/ci/'. $id, array(
                     'method'    => 'GET',
                     'headers'   => $headers
                 ));
                 $body = json_decode( $response['body'], true );
-                $txid = $body['response']['txid'];
-                return $txid;
+                return $body;
             }
 
-            function getTransactionDetails($custom_identifier, $headers) {
-                $txid = getPayloadStatusXummWithId($custom_identifier, $headers);
+            function getTransactionDetails($txid, $headers) {
                 if (empty($txid)) return false;
                 // $tx = wp_remote_get('https://data.ripple.com/v2/transactions/'. $txid, array(
                 //     'method'    => 'GET',
@@ -511,14 +516,14 @@ function init_xumm_gateway_class() {
                 return json_decode( $tx['body'], true );
             }
 
-            function checkDeliveredAmount($delivered_amount, $total) {
+            function checkDeliveredAmount($delivered_amount, $total, $xr) {
                 if($delivered_amount != null) {
                     switch (gettype($delivered_amount)) {
                         default:
-                            $log = 'delete this and switch/case integer stops working';
+                            $log = 'todo::delete this and switch/case integer stops working';
                         case 'integer':
                             $delivered_amount = $delivered_amount/1000000;
-                            if($total != $delivered_amount || $delivered_amount < $total) {
+                            if($delivered_amount < ( $total * $xr)) {
                                 $msg = 'not enough XRP money';
                                 error_log($msg);
                                 wc_add_notice('total: '. $total . ' ; paid: '. $delivered_amount);
@@ -528,10 +533,11 @@ function init_xumm_gateway_class() {
                             } else return true;
                             break;
                         case 'array':
-                            if($delivered_amount['value'] != $total || $delivered_amount['value'] < $total) {
+                            if($delivered_amount['value'] < $total) {
                                 $msg = 'Step 1: not enough money';
                                 error_log($msg);
                                 wc_add_notice( $msg, 'error' );
+                                $order->add_order_note( 'Your order with custom id: '.$custom_identifier.' is not paid only '. $delivered_amount['value']. ' Remaining: '. $total-$delivered_amount['value'], true );
                                 return false;
                             }
                             if($delivered_amount['currency'] != $order->get_currency()) {
@@ -556,14 +562,18 @@ function init_xumm_gateway_class() {
             }
 
             function getReturnUrl($custom_identifier, $order, $headers) {
-                $txbody = getTransactionDetails($custom_identifier, $headers);
+                $payload = getPayloadXummById($custom_identifier, $headers);
+                $txid = $payload['response']['txid'];
+                $xr = $payload['custom_meta']['blob']['xr'];
+
+                $txbody = getTransactionDetails($txid, $headers);
                 if(empty($txbody)) {
                     wc_add_notice( 'Failed payment please try again', 'error' );
                     return $order->get_checkout_payment_url(false);
                 }
                 $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
                 $total = $order->get_total();
-                if(!checkDeliveredAmount($delivered_amount, $total)) {
+                if(!checkDeliveredAmount($delivered_amount, $total, $xr)) {
                     $log = 'redirect to payment page';
                     error_log( $log );
                     $redirect_url = $order->get_checkout_payment_url(false);
