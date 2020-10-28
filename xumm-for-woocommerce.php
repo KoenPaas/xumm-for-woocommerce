@@ -8,10 +8,7 @@
  * Version: 0.2
  */
 
-//http://localhost?wc-api=XUMM
-
-//
-$lang = json_decode(file_get_contents(plugin_dir_path( __FILE__ ) . 'languages/xumm-payment.en-En.json'));
+$lang = json_decode(file_get_contents(plugin_dir_path( __FILE__ ) . 'languages/xumm-payment.en-EN.json'));
 
 function init_xumm_gateway_class() {
     global $lang;
@@ -25,8 +22,8 @@ function init_xumm_gateway_class() {
             global $lang;
 
             $this->id = 'xumm';
-            $this->icon = plugin_dir_url( __FILE__ ).'public/images/icon.jpg'; //If you want to show an image next to the gateway’s name on the frontend, enter a URL to an image.
-            $this->has_fields = false; //– Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
+            $this->icon = plugin_dir_url( __FILE__ ).'public/images/icon.jpg';
+            $this->has_fields = false;
             $this->method_title = $lang->construct->title;
             $this->method_description = 'Receive any supported currency into your XRP account using XUMM';
 
@@ -378,7 +375,6 @@ function init_xumm_gateway_class() {
                 $apiCall = null;
                 $xr = 1;
             } else if ($storeCurrency != 'XRP' && $this->currencies != 'XRP' && $storeCurrency != $this->currencies) {
-                //wc_add_notice( 'Currency pair not supported, conversion from '. $storeCurrency . ' to -> '.$this->currencies, 'error' ); //Todo: Debug
                 wc_add_notice($payment->error->currency_pair, 'error');
                 return;
             } else {

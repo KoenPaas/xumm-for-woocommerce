@@ -80,7 +80,7 @@
             "insufficient": "Your order is not paid and is less than order total, Please contact support",
             "currency": "The store currency is not the same as the payment, please contact support",
             "issuer": "The issuer is not the same as the payment, please contact support",
-            "payment": "Failed payment please try again"
+            "payment": "Payment failed or cancelled, feel free to try again."
         },
         "note": {
             "success": {
