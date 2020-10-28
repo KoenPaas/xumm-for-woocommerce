@@ -203,7 +203,7 @@ function init_xumm_gateway_class() {
                                     'section'   => 'xumm'
                                 );
 
-                                $return_url = get_home_url() .'/wp-admin/admin.php/?' . http_build_query($query_arr);
+                                $return_url = get_home_url() .'/wp-admin/admin.php?' . http_build_query($query_arr);
 
                                 $headers = [
                                     'Content-Type' => 'application/json',
