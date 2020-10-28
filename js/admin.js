@@ -1,5 +1,3 @@
-console.log(xumm_object)
-
 function containsObject(obj, arr) {
     for(const index in arr) {
         let test1 = JSON.stringify(arr[index])
@@ -41,9 +39,7 @@ jQuery(document).ready(function($) {
         e.preventDefault()
 
         let apikey = jQuery("#woocommerce_xumm_api").attr("value")
-        //apikey = 'b3b3c81d-2fdd-43aa-9092-219f81d5edad'
         let secretkey = jQuery('#woocommerce_xumm_api_secret').attr("value")
-        //secretkey = '75250192-db57-4a6d-bae9-1e895ce546fd'
         const account = jQuery("#woocommerce_xumm_destination").attr("value")
         const issuer = jQuery("#woocommerce_xumm_issuers").children(":selected").attr("value")
         const currency = jQuery("#woocommerce_xumm_currencies").children(":selected").attr("value")
@@ -61,8 +57,6 @@ jQuery(document).ready(function($) {
                     "TransactionType": "TrustSet",
                     "Account": account,
                     "Fee": "12",
-                    //"Flags": 262144,
-                    //"LastLedgerSequence": 8007750,
                     "LimitAmount": {
                       "currency": currency,
                       "issuer": issuer,
