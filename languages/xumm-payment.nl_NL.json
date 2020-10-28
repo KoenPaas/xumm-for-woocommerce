@@ -57,7 +57,7 @@
             "ping_error": "Verbindings fout met de",
             "ping_success": "<b>Verbonden</b> met",
             "redirect_error": "Verbindings fout met de",
-            "incorrect_webhook": "WebHook incorrect",
+            "incorrect_webhook": "WebHook incorrect ingesteld op de",
             "corrected_webhook": "zou moeten zijn",
             "href": "XUMM API",
             "keys": "Controleer uw API keys.",
