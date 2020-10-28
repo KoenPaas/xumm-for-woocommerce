@@ -8,7 +8,12 @@
  * Version: 0.2
  */
 
-$lang = json_decode(file_get_contents(plugin_dir_path( __FILE__ ) . 'languages/xumm-payment.en-EN.json'));
+$locale = plugin_dir_path( __FILE__ ) . 'languages/xumm-payment.'.get_locale().'.json';
+if(file_exists($locale)) {
+    $lang = json_decode(file_get_contents($locale));
+} else {
+    $lang = json_decode(file_get_contents(plugin_dir_path( __FILE__ ) . 'languages/xumm-payment.en_EN.json'));
+}
 
 function init_xumm_gateway_class() {
     global $lang;
@@ -80,7 +85,7 @@ function init_xumm_gateway_class() {
                     'title'       => $form->title->title,
                     'type'        => 'text',
                     'description' => $form->title->description,
-                    'default'     => 'XRP',
+                    'default'     => $form->title->default,
                     'desc_tip'    => true,
                 ),
                 'description' => array(
@@ -670,7 +675,7 @@ function init_xumm_gateway_class() {
                     $payload = getPayloadXummById($custom_identifier, $headers);
                     $txid = $payload['response']['txid'];
                     $xr = $payload['custom_meta']['blob']['xr'];
-                    // we received the payment
+
                     $txbody = getTransactionDetails($txid, $headers);
 
                     $order_id = explode("_", $custom_identifier)[0];
@@ -684,7 +689,7 @@ function init_xumm_gateway_class() {
                     wc_reduce_stock_levels( $order_id );
                     
                     $success = $lang->callback->note->success;
-                    //some notes to customer (replace true with false to make it private)
+                    //A notes to the customer (replace true with false to make it private)
                     $order->add_order_note( $success->thanks . '<br>'. $success->check .'<a href="https://bithomp.com/explorer/'.$txid.'"> '.$success->href.'</a>', true );
             
                     WC()->cart->empty_cart();

@@ -11,7 +11,8 @@
         },
         "title": {
             "title": "Title",
-            "description": "This is the title which the user sees during checkout."
+            "description": "This is the title which the user sees during checkout.",
+            "default": "XRP Payment"
         },
         "description": {
             "title": "Description",
