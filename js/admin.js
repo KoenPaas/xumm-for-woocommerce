@@ -11,6 +11,10 @@ function containsObject(obj, arr) {
 }
 
 jQuery(document).ready(function($) {
+    $("#set_trustline")
+    var button = document.getElementById("set_trustline");
+    document.querySelector("#woocommerce_xumm_issuers").closest("fieldset").append(button);
+
     var selectedCurrency = $("#woocommerce_xumm_currencies").children(":selected").attr("value");
     var selectedIssuer
 
@@ -29,9 +33,9 @@ jQuery(document).ready(function($) {
         }
 
         if (!containsObject(obj, trustlinesSet)) {
-            jQuery('#set_trustline').show()
+            button.disabled = true
         } else {
-            jQuery('#set_trustline').hide()
+            button.disabled = false
         }
     })
 
@@ -111,11 +115,10 @@ function setIssuer() {
 function dissableIssuers() {
     const IOU = jQuery("#woocommerce_xumm_currencies").children(":selected").attr("value")
     if(IOU == 'XRP'){
-        jQuery("#woocommerce_xumm_issuers").parent().hide()
-        jQuery('#set_trustline').hide()
+        jQuery("#woocommerce_xumm_issuers").parent().prop( "disabled", true );
         return
     } else {
-        jQuery("#woocommerce_xumm_issuers").parent().show()
+        jQuery("#woocommerce_xumm_issuers").parent().prop( "disabled", false );
     }
     let list = []
 
