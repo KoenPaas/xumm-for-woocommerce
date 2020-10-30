@@ -26,17 +26,7 @@ jQuery(document).ready(function($) {
 
     jQuery("#woocommerce_xumm_issuers").change(function() {
         selectedIssuer = jQuery(this).children(":selected").attr("value");
-
-        let obj = {
-            account: selectedIssuer,
-            currency: selectedCurrency
-        }
-
-        if (!containsObject(obj, trustlinesSet)) {
-            button.disabled = true
-        } else {
-            button.disabled = false
-        }
+        trustlineButton(selectedIssuer, selectedCurrency);
     })
 
     jQuery('#set-trustline').click( async e => {
@@ -81,6 +71,20 @@ jQuery(document).ready(function($) {
     setIssuer()
     dissableIssuers()
 });
+
+function trustlineButton(issuer, currency) {
+    var button = document.getElementById("set_trustline");
+    let obj = {
+        account: issuer,
+        currency: currency
+    }
+
+    if (!containsObject(obj, trustlinesSet)) {
+        button.disabled = true
+    } else {
+        button.disabled = false
+    }
+} 
 
 function setIssuer() {
     const IOU = jQuery("#woocommerce_xumm_currencies").children(":selected").attr("value")
@@ -172,7 +176,7 @@ ws.onmessage = (msg) => {
     array.forEach(line => {
         trustlinesSet.push({account: line.account, currency: line.currency})
     })
-    checkIfAvailableTrustline()
+    trustlineAvailable()
 }
 
 let issuers = []
@@ -188,12 +192,4 @@ function trustlineAvailable() {
             issuers.push(issuer)
         }
     }
-}
-
-function checkIfAvailableTrustline() {
-    trustlineAvailable()
-}
-
-function setTrustline() {
-    const selectedIssuer = jQuery("#woocommerce_xumm_issuers").children(":selected").attr("value")
 }
