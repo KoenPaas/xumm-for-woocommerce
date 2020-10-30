@@ -1,34 +1,58 @@
 <?php
+    $headers = array(
+        'Content-Type' => 'application/json',
+        'X-API-Key' => $this->api,
+        'X-API-Secret' => $this->api_secret
+    );
 
     $json = file_get_contents('php://input');
-    $data = json_decode($json, true);
+    $json = json_decode($json, true);
 
-    $uuid = $data['payloadResponse']['payload_uuidv4'];
+    $uuid = $json['payloadResponse']['payload_uuidv4'];
 
     if($uuid != null) {
-        $custom_identifier = $data['custom_meta']['identifier'];
+        $custom_identifier = $json['custom_meta']['identifier'];
         if ($custom_identifier != null) {
-            $payload = getPayloadXummById($custom_identifier, $headers);
-            $txid = $payload['response']['txid'];
-            $xr = $payload['custom_meta']['blob']['xr'];
+            $data = getPayloadXummById($custom_identifier, $headers);
+            if (!empty($data['payload'])) {
 
-            $txbody = getTransactionDetails($txid, $headers);
+                switch ($data['payload']['tx_type']) {
+                    
+                    case 'Payment':
+                        $txid = $data['response']['txid'];
+                        $xr = $data['custom_meta']['blob']['xr'];
 
-            $order_id = explode("_", $custom_identifier)[0];
-            $order = wc_get_order( $order_id );
-            $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
-            if(!checkDeliveredAmount($delivered_amount, $order, $xr, $this->issuers, $txid)) {
-                exit();
+                        $txbody = getTransactionDetails($txid, $headers);
+
+                        $order_id = explode("_", $custom_identifier)[0];
+                        $order = wc_get_order( $order_id );
+                        $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
+                        if(!checkDeliveredAmount($delivered_amount, $order, $xr, $this->issuers, $txid)) {
+                            exit();
+                        }
+
+                        $order->payment_complete();
+                        wc_reduce_stock_levels( $order_id );
+                        
+                        $success = $lang->callback->note->success;
+                        // A notes to the customer (replace true with false to make it private)
+                        $order->add_order_note( $success->thanks . '<br>'. $success->check .'<a href="https://bithomp.com/explorer/'.$txid.'"> '.$success->href.'</a>', true );
+                
+                        WC()->cart->empty_cart();
+                        break;
+
+                    case 'SignIn':
+                        $account = $data['response']['account'];
+                        if(!empty($account))
+                            echo($account);
+                            $this->update_option('destination', $account );
+                        break;
+
+                    case 'TrustSet':
+                        
+                        break;
+                }
             }
-
-            $order->payment_complete();
-            wc_reduce_stock_levels( $order_id );
-            
-            $success = $lang->callback->note->success;
-            //A notes to the customer (replace true with false to make it private)
-            $order->add_order_note( $success->thanks . '<br>'. $success->check .'<a href="https://bithomp.com/explorer/'.$txid.'"> '.$success->href.'</a>', true );
-    
-            WC()->cart->empty_cart();
 
         }
     }
