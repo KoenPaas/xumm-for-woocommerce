@@ -22,10 +22,10 @@ function init_xumm_gateway_class() {
             global $lang;
 
             $this->id = 'xumm';
-            $this->icon = plugin_dir_url( __FILE__ ).'public/images/icon.jpg';
+            $this->icon = plugin_dir_url( __FILE__ ).'public/images/label.png';
             $this->has_fields = false;
             $this->method_title = $lang->construct->title;
-            $this->method_description = 'Receive any supported currency into your XRP account using XUMM';
+            $this->method_description = $lang->construct->description;
 
             $this->supports = array(
                 'products'
