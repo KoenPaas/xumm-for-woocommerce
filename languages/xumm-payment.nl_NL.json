@@ -54,14 +54,14 @@
             "gateway_unsupported": "Verander de valuta in dit menu"
         },
         "api": {
-            "ping_error": "Verbindings fout met de",
+            "ping_error": "Verbindingsfout met de",
             "ping_success": "<b>Verbonden</b> met",
-            "redirect_error": "Verbindings fout met de",
+            "redirect_error": "Verbindingsfout met de",
             "incorrect_webhook": "WebHook incorrect ingesteld op de",
             "corrected_webhook": "zou moeten zijn",
             "href": "XUMM API",
             "keys": "Controleer uw API keys.",
-            "no_response": "Verbindings fout met de",
+            "no_response": "Verbindingsfout met de",
             "no_keys": "Voeg uw XUMM API keys toe vanuit"
         }
     },
