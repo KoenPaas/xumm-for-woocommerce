@@ -75,9 +75,9 @@
     },
     "callback": {
         "error": {
-            "amount": "Error on the amount",
-            "xumm_payload": "Connection error getting payload XUMM.",
-            "zero": "No amount received",
+            "amount": "Payment amount error",
+            "xumm_payload": "Connection error getting payload details from the XUMM platform.",
+            "zero": "No funds received",
             "insufficient": "Your order is not paid and is less than order total, Please contact support",
             "currency": "The store currency is not the same as the payment, please contact support",
             "issuer": "The issuer is not the same as the payment, please contact support",
@@ -85,12 +85,12 @@
         },
         "note": {
             "success": {
-                "thanks": "Hey, your order is paid! Thank you!",
+                "thanks": "Hi, your order is paid! Thank you!",
                 "check": "Check the transaction details",
                 "href": "information"
             },
             "insufficient": {
-                "message": "Your order is not paid and is less than order total, Please contact support",
+                "message": "Your order is not paid and is less than order total, please contact support",
                 "open": "Open:",
                 "paid": "Paid:",
                 "information": "Transaction information"
@@ -109,10 +109,10 @@
         "status": {
             "processing": "",
             "pending": "",
-            "on_hold": "Order Status: On-Hold",
-            "completed": "Order Status: Completed",
+            "on_hold": "Order status: on hold",
+            "completed": "Order status: completed",
             "cancelled": "Your order has been cancelled, please try again.",
-            "failed": "Payment has failed please try again!",
+            "failed": "Failed payment. Please try again!",
             "refunded": "Order has been refunded",
             "default": "There is something wrong with the order, please contact us."
         }
