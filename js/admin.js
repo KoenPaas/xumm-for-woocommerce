@@ -11,22 +11,16 @@ function containsObject(obj, arr) {
 }
 
 jQuery(document).ready(function($) {
-    $("#set_trustline")
     var button = document.getElementById("set_trustline");
     document.querySelector("#woocommerce_xumm_issuers").closest("fieldset").append(button);
 
-    var selectedCurrency = $("#woocommerce_xumm_currencies").children(":selected").attr("value");
-    var selectedIssuer
-
     $("#woocommerce_xumm_currencies").change(function() {
-        selectedCurrency = $(this).children(":selected").attr("value");
         setIssuer()
         dissableIssuers()
     })
 
     jQuery("#woocommerce_xumm_issuers").change(function() {
-        selectedIssuer = jQuery(this).children(":selected").attr("value");
-        trustlineButton(selectedIssuer, selectedCurrency);
+        trustlineButton();
     })
 
     jQuery('#set-trustline').click( async e => {
@@ -72,14 +66,19 @@ jQuery(document).ready(function($) {
     dissableIssuers()
 });
 
-function trustlineButton(issuer, currency) {
+function trustlineButton() {
     var button = document.getElementById("set_trustline");
+    const issuer = jQuery("#woocommerce_xumm_issuers").children(":selected").attr("value");
+    const currency = jQuery("#woocommerce_xumm_currencies").children(":selected").attr("value");
+
     let obj = {
         account: issuer,
         currency: currency
     }
 
     if (!containsObject(obj, trustlinesSet)) {
+        console.log(obj)
+        console.log(trustlinesSet)
         button.disabled = true
     } else {
         button.disabled = false
