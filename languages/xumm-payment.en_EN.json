@@ -25,11 +25,11 @@
         },
         "api": {
             "title": "API Key",
-            "description": "Get the API Key from https://apps.xumm.dev/"
+            "description": "Get the API Key from"
         },
         "api_secret": {
             "title": "API Secret Key",
-            "description": "Get the API Secret Key from https://apps.xumm.dev/"
+            "description": "Get the API Secret Key from"
         },
         "currencies": {
             "title": "Select your currency",

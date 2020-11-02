@@ -25,11 +25,11 @@
         },
         "api": {
             "title": "API Key",
-            "description": "Krijg een API Key van https://apps.xumm.dev/"
+            "description": "Krijg een API Key van"
         },
         "api_secret": {
             "title": "API Secret Key",
-            "description": "Krijg een API Secret Key van https://apps.xumm.dev/"
+            "description": "Krijg een API Secret Key van"
         },
         "currencies": {
             "title": "Kies de valuta",

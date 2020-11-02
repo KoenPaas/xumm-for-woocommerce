@@ -45,13 +45,13 @@
                 'api' => array(
                     'title'       => $form->api->title,
                     'type'        => 'text',
-                    'description' => $form->api->description,
+                    'description' => $form->api->description .' <a href="https://apps.xumm.dev/">https://apps.xumm.dev/</a>',
                     'default'     => '',
                 ),
                 'api_secret' => array(
                     'title'       => $form->api_secret->title,
                     'type'        => 'text',
-                    'description' => $form->api_secret->description,
+                    'description' => $form->api_secret->description .' <a href="https://apps.xumm.dev/">https://apps.xumm.dev/</a>',
                     'default'     => '',
                 )
             );
