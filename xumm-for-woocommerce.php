@@ -42,14 +42,25 @@ function init_xumm_gateway_class() {
             $this->currencies = $this->get_option('currencies');
             $this->issuers = $this->get_option('issuers');
 
+            wp_register_script( 'xumm_js', plugins_url( 'xumm-for-woocommerce/js/admin.js' , plugin_dir_path( __FILE__ )), array('jquery'), null, false );
+
             $this->init_form_fields();
             $this->init_settings();
 
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-            add_action( 'woocommerce_api_xumm', array( $this, 'callback_handler' ));
-            
+            add_action( 'woocommerce_api_'. $this->id, array( $this, 'callback_handler' ));
+            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_script' ));
+
         }
+
+        public function enqueue_admin_script($hook) {
+            if ( 'woocommerce_page_wc-settings' != $hook ) {
+                return;
+            }
+            wp_enqueue_script('xumm_js');
+        }
+
 
         public function init_form_fields() {
             require 'inc/admin_form.php';

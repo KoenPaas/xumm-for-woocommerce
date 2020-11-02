@@ -152,7 +152,7 @@
                                 echo('<div class="notice notice-success"><p>'.$admin->api->ping_success.' <a href="https://apps.xumm.dev/">'.$admin->api->href.'</a></p></div>');
                                 
                                 $webhookApi = $body['auth']['application']['webhookurl'];
-                                $webhook = get_home_url() . '/?wc-api=XUMM';
+                                $webhook = get_home_url() . '/?wc-api='. $this->id;
                                 if($webhook != $webhookApi) echo('<div class="notice notice-error"><p>'.$admin->api->incorrect_webhook.' <a href="https://apps.xumm.dev/">'.$admin->api->href.'</a>, '.$admin->api->corrected_webhook.' '.$webhook.'</p></div>');
                             }
                             else echo('<div class="notice notice-error"><p>'.$admin->api->ping_error.' <a href="https://apps.xumm.dev/">'.$admin->api->href.'</a>. '.$admin->api->keys .'Error Code:'. $body['error']['code'].'</p></div>');

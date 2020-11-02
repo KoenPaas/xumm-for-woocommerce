@@ -90,6 +90,6 @@
              $body['account'] = $this->destination;
              $body['store_currency'] = get_woocommerce_currency();
 
-            wp_enqueue_script( 'custom-js', plugins_url( '/js/admin.js' , dirname(__FILE__ )), array('jquery') );
-            wp_localize_script( 'custom-js', 'xumm_object', $body);
+            wp_localize_script( 'xumm_js', 'xumm_object', $body);
+
 ?>
