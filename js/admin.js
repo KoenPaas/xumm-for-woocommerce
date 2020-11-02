@@ -77,8 +77,6 @@ function trustlineButton() {
     }
 
     if (!containsObject(obj, trustlinesSet)) {
-        console.log(obj)
-        console.log(trustlinesSet)
         button.disabled = false
     } else {
         button.disabled = true
@@ -138,13 +136,13 @@ function dissableIssuers() {
     }
 
     jQuery("#woocommerce_xumm_issuers option").each( (index, elem) => {
-        jQuery(elem).hide()
+        jQuery(elem).attr('disabled', 'disabled').hide()
     })
         jQuery("#woocommerce_xumm_issuers option").each( (index, elem) => {
         var val = jQuery(elem).attr("value")
         list.forEach(obj => {
             if(obj.issuer == val) {
-                jQuery(elem).show()
+                jQuery(elem).removeAttr('disabled').show()
             }
         })
     })
