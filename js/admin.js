@@ -79,9 +79,9 @@ function trustlineButton() {
     if (!containsObject(obj, trustlinesSet)) {
         console.log(obj)
         console.log(trustlinesSet)
-        button.disabled = true
-    } else {
         button.disabled = false
+    } else {
+        button.disabled = true
     }
 } 
 
@@ -176,6 +176,7 @@ ws.onmessage = (msg) => {
         trustlinesSet.push({account: line.account, currency: line.currency})
     })
     trustlineAvailable()
+    trustlineButton()
 }
 
 let issuers = []
