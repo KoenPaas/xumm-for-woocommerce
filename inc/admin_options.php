@@ -166,7 +166,7 @@
             </table>
 
             <input type="hidden" id="specialAction" name="specialAction" value="">
-            <button type="button" class="customFormActionBtn" id="set_destination" style="border-style: none;">
+            <button type="button" class="customFormActionBtn" id="set_destination" style="border-style: none; cursor:pointer; background-color: Transparent;">
                 <?php echo(file_get_contents(dirname(plugin_dir_path( __FILE__ )) .'/public/images/signin.svg')); ?>
             </button>
             <button type="button" class="customFormActionBtn button-primary" id="set_trustline">
