@@ -48,8 +48,13 @@
     
                     $total = $order->get_total();
                     if($delivered_amount != null) {
-    
                         switch (gettype($delivered_amount)) {
+                            case 'string':
+                                if(!is_numeric($delivered_amount)) {
+                                    wc_add_notice($error->amount, 'error');
+                                    return false;
+                                break;
+                                }
                             case 'integer':
                                 $delivered_amount = $delivered_amount/1000000;
                                 if($delivered_amount < ( $total * $xr)) {
@@ -60,10 +65,9 @@
                                     }
                                     return false;
                                 } else return true;
-                                break;
+                            break;
     
                             case 'array':
-    
                                 if($delivered_amount['issuer'] != $issuers) {
                                     wc_add_notice( $error->issuer, 'error' );
                                     $order->add_order_note($note->issuer->message .'<br>'.$note->issuer->paid .' '. $delivered_amount['currency'] .' '. $delivered_amount['value'] .'<br> <a href="https://bithomp.com/explorer/'.$txid.'">'. $note->issuer->information .'</a>',true);
@@ -86,10 +90,12 @@
                                 }
     
                                 else return true;
-                                break;
+                            break;
     
                             default:
                                 wc_add_notice($error->amount, 'error');
+                                return false;
+                            break; 
                         }
                     } else {
                         wc_add_notice($error->amount, 'error');
