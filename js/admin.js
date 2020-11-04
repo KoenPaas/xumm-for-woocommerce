@@ -77,7 +77,11 @@ function trustlineButton() {
     }
 
     if (!containsObject(obj, trustlinesSet)) {
-        button.disabled = false
+        if (issuer == undefined) {
+            button.disabled = true
+        } else {
+            button.disabled = false
+        }
     } else {
         button.disabled = true
     }
