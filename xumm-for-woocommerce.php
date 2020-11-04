@@ -76,7 +76,15 @@ function init_xumm_gateway_class() {
         }
 
         public function process_payment( $order_id ) {
-            require 'inc/process_payment.php';
+            $return = require 'inc/process_payment.php';
+            if($return != null){
+                return array(
+                    'result' => 'success',
+                    'redirect' => $return
+                );
+            } else {
+                return;
+            }
         }
 
         public function callback_handler() {
