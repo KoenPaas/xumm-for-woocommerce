@@ -107,10 +107,7 @@
             
             if ( $body['next']['always'] != null ) {
             // Redirect to the XUMM processor page
-            return array(
-                'result' => 'success',
-                'redirect' => $body['next']['always']
-            );
+            return $body['next']['always'];
     
             } else {
                 //Todo:: Check against detailed errors from the app.xumm api
