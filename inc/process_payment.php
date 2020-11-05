@@ -82,8 +82,7 @@
             'submit' => 'true',
             'expire' => 15,
             'return_url' => array(
-                'web' => $return_url,
-                'app' => $return_url
+                'web' => $return_url
             )   
         ),
         'custom_meta' => array(
@@ -94,6 +93,10 @@
             )
         )
     ];
+
+    if (wp_is_mobile()){
+        $body['options']['return_url']['app'] = $return_url;
+    }
     
     $body = wp_json_encode($body);
 
