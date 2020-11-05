@@ -57,11 +57,12 @@
                                 }
                             case 'integer':
                                 $delivered_amount = $delivered_amount/1000000;
-                                if($delivered_amount < ( $total * $xr)) {
+                                $total = $total * $xr;
+                                if($delivered_amount < ($total-0.000001)) {
                                     if($delivered_amount == 0) wc_add_notice($error->zero, 'error');
                                     else {
                                         wc_add_notice($error->insufficient, 'error' );
-                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' XRP '. $delivered_amount .'<br>'. $note->insufficient->open .' XRP '. $total-$delivered_amount .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
+                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' XRP '. $delivered_amount .'<br>'. $note->insufficient->open .' XRP '. ($total - $delivered_amount) .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
                                     }
                                     return false;
                                 } else return true;
