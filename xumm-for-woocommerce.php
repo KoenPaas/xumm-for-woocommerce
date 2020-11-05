@@ -72,7 +72,6 @@ function init_xumm_gateway_class() {
 
         public function payment_fields() {
             echo wpautop( wp_kses_post( $this->description ) );
-            echo file_get_contents(plugin_dir_path( __FILE__ ).'public/images/pay.svg');
         }
 
         public function process_payment( $order_id ) {
