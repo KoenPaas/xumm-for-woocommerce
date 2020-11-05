@@ -70,7 +70,8 @@
                                             "options" => [
                                                 "submit" => true,
                                                 "return_url" => [
-                                                    "web" => $return_url
+                                                    "web" => $return_url,
+                                                    "app" => $return_url
                                                 ]
                                             ],
                                             'custom_meta' => array(
@@ -95,7 +96,8 @@
                                             "options" => [
                                                 "submit" => true,
                                                 "return_url" => [
-                                                    "web" => $return_url
+                                                    "web" => $return_url,
+                                                    "app" => $$return_url
                                                 ]
                                             ],
                                             'custom_meta' => array(

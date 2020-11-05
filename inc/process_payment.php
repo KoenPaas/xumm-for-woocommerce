@@ -82,7 +82,8 @@
             'submit' => 'true',
             'expire' => 15,
             'return_url' => array(
-                'web' => $return_url
+                'web' => $return_url,
+                'app' => $return_url
             )   
         ),
         'custom_meta' => array(
@@ -93,6 +94,7 @@
             )
         )
     ];
+    
     $body = wp_json_encode($body);
 
     $response = wp_remote_post('https://xumm.app/api/v1/platform/payload', array(
