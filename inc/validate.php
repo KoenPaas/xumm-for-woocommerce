@@ -62,7 +62,7 @@
                                     if($delivered_amount == 0) wc_add_notice($error->zero, 'error');
                                     else {
                                         wc_add_notice($error->insufficient, 'error' );
-                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' XRP '. $delivered_amount .'<br>'. $note->insufficient->open .' XRP '. ($total - $delivered_amount) .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
+                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' XRP '. number_format($delivered_amount, 6) .'<br>'. $note->insufficient->open .' XRP '. number_format(($total - $delivered_amount), 6) .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
                                     }
                                     return false;
                                 } else return true;
@@ -85,7 +85,7 @@
                                     if($delivered_amount['value'] == 0) wc_add_notice($error->zero, 'error');
                                     else {
                                         wc_add_notice($error->insufficient, 'error');
-                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' '. $delivered_amount['currency'] .' '. $delivered_amount['value'] .'<br>'. $note->insufficient->open .' '. $delivered_amount['currency'] .' '. $total-$delivered_amount['value'] .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
+                                        $order->add_order_note($note->insufficient->message .'<br>'.$note->insufficient->paid .' '. $delivered_amount['currency'] .' '. $delivered_amount['value'] .'<br>'. $note->insufficient->open .' '. $delivered_amount['currency'] .' '. ($total-$delivered_amount['value']) .'<br>'. '<a href="https://bithomp.com/explorer/'.$txid.'">'. $note->insufficient->information .'</a>',true);
                                     }
                                     return false;
                                 }
