@@ -23,6 +23,10 @@
             "title": "XRP Destination addres",
             "description": "Dit is uw XRP addres"
         },
+        "explorer": {
+            "title": "Transactie Explorer",
+            "description": "Kies de explorer om de transactie te controleren"
+        },
         "api": {
             "title": "API Key",
             "description": "Krijg een API Key van"

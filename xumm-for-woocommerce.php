@@ -37,6 +37,7 @@ function init_xumm_gateway_class() {
             $this->destination = $this->get_option('destination');
             $this->currency = $this->get_option('currency');
             $this->issuer = $this->get_option('issuer');
+            $this->explorer = $this->get_option('explorer');
             $this->api = $this->get_option('api');
             $this->api_secret = $this->get_option('api_secret');
             $this->currencies = $this->get_option('currencies');

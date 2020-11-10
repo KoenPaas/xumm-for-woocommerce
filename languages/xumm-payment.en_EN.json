@@ -23,6 +23,10 @@
             "title": "XRP Destination address",
             "description": "This is your XRP r Address"
         },
+        "explorer": {
+            "title": "Transaction Explorer",
+            "description": "Choose the explorer to check the transaction"
+        },
         "api": {
             "title": "API Key",
             "description": "Get the API Key from"

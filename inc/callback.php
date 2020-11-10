@@ -5,6 +5,8 @@
         'X-API-Secret' => $this->api_secret
     );
 
+    $explorer = $this->explorer;
+
     $json = file_get_contents('php://input');
     $json = json_decode($json, true);
 
@@ -27,7 +29,7 @@
                         $order_id = explode("_", $custom_identifier)[0];
                         $order = wc_get_order( $order_id );
                         $delivered_amount = $txbody['transaction']['meta']['delivered_amount'];
-                        if(!checkDeliveredAmount($delivered_amount, $order, $xr, $this->issuers, $txid)) {
+                        if(!checkDeliveredAmount($delivered_amount, $order, $xr, $this->issuers, $txid, $explorer)) {
                             exit();
                         }
 

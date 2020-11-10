@@ -42,6 +42,18 @@
                     'description' => $form->destination->description,
                     'desc_tip'    => true,
                 ),
+                'explorer' => array(
+                    'title'       => $form->explorer->title,
+                    'description' => $form->explorer->description,
+                    'type'        => 'select',
+                    'options'     => array(
+                        'https://bithomp.com/explorer/' => 'Bithomp',
+                        'https://xrpscan.com/tx/' => 'XRPScan',
+                        'https://livenet.xrpl.org/transactions/' => 'XRPL.org'
+                    ),
+                    'default'     => 'https://bithomp.com/explorer/',
+                    'desc_tip'    => true
+                ),
                 'api' => array(
                     'title'       => $form->api->title,
                     'type'        => 'text',
