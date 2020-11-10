@@ -38,7 +38,7 @@
                         
                         $success = $lang->callback->note->success;
                         // A notes to the customer (replace true with false to make it private)
-                        $order->add_order_note( $success->thanks . '<br>'. $success->check .'<a href="https://bithomp.com/explorer/'.$txid.'"> '.$success->href.'</a>', true );
+                        $order->add_order_note( $success->thanks . '<br>'. $success->check .'<a href="'.$explorer.$txid.'"> '.$success->href.'</a>', true );
                 
                         WC()->cart->empty_cart();
                         break;
