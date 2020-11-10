@@ -75,7 +75,11 @@
             "currency_pair": "Valutapaar niet ondersteund. Controleer de winkelvaluta en -instellingen in de XUMM-betalingsinstelling in WooCommerce",
             "wp_connection": "Verbindingsfout",
             "xumm_api": "Kreeg een fout van XUMM"
-        } 
+        },
+        "memo": {
+            "type": "https://xumm.app/",
+            "data": "Betaald met XUMM"
+        }
     },
     "callback": {
         "error": {

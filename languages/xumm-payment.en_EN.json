@@ -75,7 +75,11 @@
             "currency_pair": "Currency pair not supported. Please check the store currency & settings in the XUMM payment setting in WooCommerce",
             "wp_connection": "Connection error",
             "xumm_api": "Got an error from XUMM"
-        } 
+        },
+        "memo": {
+            "type": "https://xumm.app/",
+            "data": "paid with XUMM"
+        }
     },
     "callback": {
         "error": {

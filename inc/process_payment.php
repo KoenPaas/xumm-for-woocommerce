@@ -67,6 +67,8 @@
         'X-API-Secret' => $this->api_secret
     );
 
+    $memo = bin2hex('Order id: '.$order_id.', '.$payment->memo->data);
+
     $body = [
         'txjson'  => array(
             'TransactionType' => 'Payment',
@@ -76,8 +78,17 @@
                 'value' => $totalSum,
                 'issuer' => $this->issuers
                 ),
-            'Flags' => 2147483648
+            'Memos' => array(
+                0 => array(
+                    'Memo' => array(
+                        'MemoType' => strtoupper(bin2hex($payment->memo->type)),
+                        // 'MemoFormat' => "",
+                        'MemoData' => strtoupper($memo)
+                    )
+                )
             ),
+            'Flags' => 2147483648
+        ),
         'options' => array(
             'submit' => 'true',
             'expire' => 15,
