@@ -1,25 +1,27 @@
 === XUMM for WooCommerce ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: https://example.com/
-Tags: xumm, crypto, XRP, BTC, ETH, ripple, bitcoin, ethereum, cryptocurrency
+Contributors: wietsewind
+Donate link: https://xumm.dev/beta/test 
+Tags: xumm, crypto, xrp, ledger, cryptocurrency
 Requires at least: 4.7
 Tested up to: 5.5.3
 Stable tag: trunk
 Requires PHP: 5.6
 License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://xrpl-labs.com/static/documents/XRPL-Labs-Terms-of-Service-V1.pdf
 
-Accept XRP, EUR, USD, BTC & ETH, using a single plugin with the greatest wallet XUMM!
+Accept XRP, EUR, USD, BTC & ETH, using a single plugin with the greatest XRP ledger client (wallet): XUMM!
 
 == Description ==
 
-Short description only 150ch. This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+Allow easy on ledger, non custodial XRP ledger payments, in XRP or IOU's (issued currencies).
+
+XRP transactions are usually user initiated: open your wallet, enter the destination, amount, etc. and then you submit your transaction. In retail / e-commerce (and many other) scenarios, by "reversing" this process, the payment flow will become less prone to mistakes and much more user friendly.
 
 == Frequently Asked Questions ==
 
 = What currencies are supported? =
 
-The following store currencies are supported: XRP, EUR, USD, BTC, ETH
+The following store currencies are supported: XRP, EUR, USD, BTC, ETH.
 
 = Can I use any other store currencies? =
 
