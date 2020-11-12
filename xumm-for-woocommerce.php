@@ -1,11 +1,13 @@
 <?php
 /**
  * Plugin Name: XUMM payments for WooCommerce
- * Plugin URI: https://github.com/KoenPaas/xumm-for-woocommerce
+ * Plugin URI:  https://github.com/KoenPaas/xumm-for-woocommerce
  * Description: Make XRP payments using XUMM
- * Author: XUMM
- * Author URI: https://xumm.app/
- * Version: 0.2
+ * Author:      xumm
+ * Author URI:  https://xumm.app/
+ * Version:     0.2
+ * License:     GPL v2 or later
+ * License URI: https://xrpl-labs.com/static/documents/XRPL-Labs-Terms-of-Service-V1.pdf
  */
 
 require 'inc/language.php';
